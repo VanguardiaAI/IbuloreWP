@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+woocommerce
+python-dotenv
+requests
+gunicorn==21.2.0 
