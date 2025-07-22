@@ -50,8 +50,10 @@ def create_app():
 
     return app
 
+# Create app instance for Gunicorn
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
     print(f"Flask debug mode: {app.config.get('FLASK_DEBUG')}")
     print(f"WC Store URL: {app.config.get('WC_STORE_URL')}")
     print(f"WC Consumer Key: {app.config.get('WC_CONSUMER_KEY')[:10] if app.config.get('WC_CONSUMER_KEY') else 'Not set'}...")
