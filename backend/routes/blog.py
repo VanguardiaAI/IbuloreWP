@@ -42,6 +42,9 @@ def get_posts():
         
         if status:
             params['status'] = status
+        else:
+            # Si no se especifica estado, mostrar todos los estados en el admin
+            params['status'] = 'any'
         
         if categories:
             params['categories'] = categories

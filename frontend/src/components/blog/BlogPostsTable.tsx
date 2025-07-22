@@ -114,6 +114,7 @@ export function BlogPostsTable() {
         _embed: true,
       });
       
+      console.log("Blog API Response:", response);
       setPosts(response.posts);
       setTotalPages(response.pagination.total_pages);
       setTotalPosts(response.pagination.total);
@@ -382,6 +383,18 @@ export function BlogPostsTable() {
               ))}
             </TableBody>
           </Table>
+
+          {/* Mensaje cuando no hay posts */}
+          {posts.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No se encontraron entradas del blog.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {searchTerm || statusFilter !== "all" 
+                  ? "Intenta ajustar los filtros de búsqueda."
+                  : "Crea tu primera entrada usando el botón 'Nueva Entrada'."}
+              </p>
+            </div>
+          )}
 
           {/* Paginación */}
           {totalPages > 1 && (

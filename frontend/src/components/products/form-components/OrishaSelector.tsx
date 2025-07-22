@@ -29,7 +29,8 @@ export function OrishaSelector({ value, onValueChange }: OrishaSelectorProps) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:5001/api/orishas");
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/orishas`);
       if (!response.ok) {
         throw new Error("No se pudieron cargar los orishas");
       }

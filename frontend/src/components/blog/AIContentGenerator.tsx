@@ -255,7 +255,8 @@ export function AIContentGenerator({ selectedIdea, onContentGenerated }: AIConte
       `;
 
       // Llamada a la API del backend
-      const response = await fetch('http://localhost:5001/api/blog/ai/generate-content', {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/blog/ai/generate-content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -39,7 +39,8 @@ export default function NewOrishaPage() {
         payload.image = { id: image.id };
       }
 
-      const response = await fetch("http://localhost:5001/api/orishas", {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/orishas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

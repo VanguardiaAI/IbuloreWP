@@ -1,5 +1,5 @@
 // API base configuration
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
 
 // Generic API helper
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {

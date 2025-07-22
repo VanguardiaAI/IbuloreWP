@@ -16,7 +16,8 @@ export default function OrishasPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("http://localhost:5001/api/orishas");
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/orishas`);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -36,7 +37,8 @@ export default function OrishasPage() {
   const handleDelete = async (id: number) => {
     if (confirm("¿Estás seguro de que quieres eliminar este orisha? Esta acción no se puede deshacer.")) {
         try {
-            const response = await fetch(`http://localhost:5001/api/orishas/${id}`, {
+            const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+            const response = await fetch(`${API_BASE_URL}/orishas/${id}`, {
                 method: "DELETE",
             });
             if (response.ok) {

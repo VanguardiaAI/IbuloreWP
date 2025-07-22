@@ -41,7 +41,8 @@ export default function EditOrishaPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:5001/api/orishas/${id}`);
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/orishas/${id}`);
       if (!response.ok) {
         throw new Error("No se pudo cargar la información del orisha.");
       }
@@ -72,7 +73,8 @@ export default function EditOrishaPage() {
         payload.image = null; // Send null to remove the image
       }
 
-      const response = await fetch(`http://localhost:5001/api/orishas/${id}`, {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/orishas/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
