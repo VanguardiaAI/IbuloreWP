@@ -10,6 +10,10 @@ RUN npm ci
 # Copy source files
 COPY . .
 
+# Accept build arguments
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
 # Build the application
 RUN npm run build
 
