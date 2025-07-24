@@ -13,13 +13,14 @@ from routes.inventory import inventory_bp
 from routes.orishas import orishas_bp
 from routes.blog import blog_bp
 from routes.dashboard import dashboard_bp
+from routes.ai import ai_bp
 
 
 def create_app():
     """
     Creates and configures a Flask application.
     """
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/static')
     app.config.from_object(Config)
 
     # Enable CORS for the React frontend - más permisivo para desarrollo
@@ -44,6 +45,7 @@ def create_app():
     app.register_blueprint(orishas_bp, url_prefix='/api')
     app.register_blueprint(blog_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp, url_prefix='/api')
+    app.register_blueprint(ai_bp, url_prefix='/api')
 
 
     @app.route("/")

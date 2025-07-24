@@ -95,7 +95,8 @@ export function AIPhotoGenerator({ onImageGenerated }: AIPhotoGeneratorProps) {
       formData.append('image', selectedImage);
       formData.append('prompt', prompt);
 
-      const response = await fetch('/api/ai/generate-product-photo', {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/ai/generate-product-photo`, {
         method: 'POST',
         body: formData,
       });

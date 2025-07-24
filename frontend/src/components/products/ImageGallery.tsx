@@ -30,7 +30,8 @@ export function ImageGallery({ refreshTrigger }: ImageGalleryProps) {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch('/api/ai/generated-images');
+      const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/ai/generated-images`);
       if (!response.ok) {
         throw new Error('Error al cargar las imágenes');
       }
