@@ -219,14 +219,14 @@ export default function NewProductPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Añadir Nuevo Producto</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Añadir Nuevo Producto</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Crea un nuevo producto para tu tienda usando el formulario organizado por secciones
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Button 
             variant="outline" 
             type="button"
@@ -235,6 +235,7 @@ export default function NewProductPage() {
               form.setValue("status", "draft");
               form.handleSubmit(onSubmit)();
             }}
+            className="w-full sm:w-auto"
           >
             {isLoading ? "Guardando..." : "Guardar Borrador"}
           </Button>
@@ -245,6 +246,7 @@ export default function NewProductPage() {
               form.setValue("status", "published");
               form.handleSubmit(onSubmit)();
             }}
+            className="w-full sm:w-auto"
           >
             {isLoading ? "Publicando..." : "Publicar Producto"}
           </Button>

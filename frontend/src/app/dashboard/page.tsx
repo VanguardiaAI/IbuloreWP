@@ -254,37 +254,37 @@ export default function DashboardPage() {
               Gestiona tu tienda de manera eficiente
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Button 
-              className="h-20 flex flex-col gap-2"
+              className="h-20 flex flex-col gap-2 text-sm"
               onClick={() => router.push('/dashboard/products/new')}
             >
               <Package className="w-6 h-6" />
-              <span>Nuevo Producto</span>
+              <span className="text-xs sm:text-sm">Nuevo Producto</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col gap-2"
+              className="h-20 flex flex-col gap-2 text-sm"
               onClick={() => router.push('/dashboard/orders')}
             >
               <ShoppingCart className="w-6 h-6" />
-              <span>Ver Pedidos</span>
+              <span className="text-xs sm:text-sm">Ver Pedidos</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col gap-2"
+              className="h-20 flex flex-col gap-2 text-sm"
               onClick={() => router.push('/dashboard/customers')}
             >
               <Users className="w-6 h-6" />
-              <span>Gestionar Clientes</span>
+              <span className="text-xs sm:text-sm">Gestionar Clientes</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col gap-2"
+              className="h-20 flex flex-col gap-2 text-sm"
               onClick={() => router.push('/dashboard/reports')}
             >
               <BarChart3 className="w-6 h-6" />
-              <span>Reportes</span>
+              <span className="text-xs sm:text-sm">Reportes</span>
             </Button>
           </CardContent>
         </Card>

@@ -9,6 +9,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { MobileSidebar } from "./MobileSidebar";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -33,6 +34,7 @@ import {
   Sparkles,
   Camera,
   Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -247,23 +249,33 @@ function SidebarContent({ onLinkClick }: SidebarContentProps) {
   );
 }
 
-// Componente principal de la barra lateral (versión simplificada sin Sheet por ahora)
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+// Componente principal de la barra lateral con soporte móvil
+export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   return (
     <>
-      {/* Botón para móvil (temporal, sin funcionalidad hasta resolver Sheet) */}
+      {/* Botón del menú móvil */}
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm border"
-        disabled
+        className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm border shadow-sm"
+        onClick={() => setIsOpen(true)}
       >
         <Menu className="h-5 w-5" />
-        <span className="sr-only">Menú (próximamente)</span>
+        <span className="sr-only">Abrir menú</span>
       </Button>
 
+      {/* Menú móvil personalizado */}
+      <MobileSidebar isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <SidebarContent onLinkClick={() => setIsOpen(false)} />
+      </MobileSidebar>
+
       {/* Barra lateral para desktop */}
-      <aside className="hidden md:flex w-64 min-h-screen bg-card text-card-foreground border-r border-border p-4 flex-col fixed left-0 top-0 z-40 overflow-x-hidden">
+      <aside className="hidden md:flex w-64 min-h-screen bg-card text-card-foreground border-r border-border p-4 flex-col fixed left-0 top-0 z-40">
         <SidebarContent />
       </aside>
     </>

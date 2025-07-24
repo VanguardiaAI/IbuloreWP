@@ -235,7 +235,7 @@ export function ProductsTable() {
             cell: ({ row }) => (
               <div>
                 <div className="font-bold">{row.getValue("name")}</div>
-                <div className="text-sm text-muted-foreground">SKU: {row.original.sku}</div>
+                <div className="text-sm text-muted-foreground hidden sm:block">SKU: {row.original.sku}</div>
               </div>
             ),
         },
@@ -291,7 +291,7 @@ export function ProductsTable() {
             accessorKey: "categories",
             header: "Categorías",
             cell: ({ row }) => (
-                <div className="flex flex-wrap gap-1">
+                <div className="hidden md:flex flex-wrap gap-1">
                     {row.original.categories.map(cat => (
                         <Badge key={cat.name} variant="outline">{cat.name}</Badge>
                     ))}
@@ -395,12 +395,12 @@ export function ProductsTable() {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <Input
-              placeholder="Filtrar por nombre..."
+              placeholder="Buscar..."
               value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
                 table.getColumn("name")?.setFilterValue(event.target.value)
               }
-              className="max-w-sm"
+              className="w-full sm:max-w-sm"
             />
             {table.getFilteredSelectedRowModel().rows.length > 0 && (
               <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-200">
@@ -408,7 +408,7 @@ export function ProductsTable() {
                   <span className="text-sm font-medium">
                     {table.getFilteredSelectedRowModel().rows.length}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground hidden sm:inline">
                     {table.getFilteredSelectedRowModel().rows.length === 1 ? "producto seleccionado" : "productos seleccionados"}
                   </span>
                 </div>
@@ -494,9 +494,9 @@ export function ProductsTable() {
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-between py-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4">
           <div className="text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} de{" "}
+            <span className="hidden sm:inline">{table.getFilteredSelectedRowModel().rows.length} de{" "}</span>
             {table.getFilteredRowModel().rows.length} fila(s) seleccionada(s).
           </div>
           <div className="flex items-center space-x-2">
