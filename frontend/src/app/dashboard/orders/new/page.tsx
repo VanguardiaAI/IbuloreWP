@@ -162,36 +162,45 @@ export default function NewOrderPage() {
       const { subtotal, shipping, tax, total } = calculateTotals();
       
       // Validar y preparar datos de facturación con valores por defecto
+      // Asegurar que siempre tengamos valores string, nunca undefined
       const billingData = {
-        first_name: selectedCustomer.billing?.first_name || selectedCustomer.first_name || "",
-        last_name: selectedCustomer.billing?.last_name || selectedCustomer.last_name || "",
-        company: selectedCustomer.billing?.company || "",
-        address_1: selectedCustomer.billing?.address_1 || "",
-        address_2: selectedCustomer.billing?.address_2 || "",
-        city: selectedCustomer.billing?.city || "",
-        state: selectedCustomer.billing?.state || "",
-        postcode: selectedCustomer.billing?.postcode || "",
-        country: selectedCustomer.billing?.country || "MX",
-        email: selectedCustomer.billing?.email || selectedCustomer.email || "",
-        phone: selectedCustomer.billing?.phone || selectedCustomer.phone || ""
+        first_name: String(selectedCustomer.billing?.first_name || selectedCustomer.first_name || "").trim(),
+        last_name: String(selectedCustomer.billing?.last_name || selectedCustomer.last_name || "").trim(),
+        company: String(selectedCustomer.billing?.company || ""),
+        address_1: String(selectedCustomer.billing?.address_1 || ""),
+        address_2: String(selectedCustomer.billing?.address_2 || ""),
+        city: String(selectedCustomer.billing?.city || ""),
+        state: String(selectedCustomer.billing?.state || ""),
+        postcode: String(selectedCustomer.billing?.postcode || ""),
+        country: String(selectedCustomer.billing?.country || "MX"),
+        email: String(selectedCustomer.billing?.email || selectedCustomer.email || "").trim(),
+        phone: String(selectedCustomer.billing?.phone || selectedCustomer.phone || "")
       };
 
       // Validar y preparar datos de envío con valores por defecto
       const shippingData = {
-        first_name: selectedCustomer.shipping?.first_name || selectedCustomer.first_name || "",
-        last_name: selectedCustomer.shipping?.last_name || selectedCustomer.last_name || "",
-        company: selectedCustomer.shipping?.company || "",
-        address_1: selectedCustomer.shipping?.address_1 || selectedCustomer.billing?.address_1 || "",
-        address_2: selectedCustomer.shipping?.address_2 || selectedCustomer.billing?.address_2 || "",
-        city: selectedCustomer.shipping?.city || selectedCustomer.billing?.city || "",
-        state: selectedCustomer.shipping?.state || selectedCustomer.billing?.state || "",
-        postcode: selectedCustomer.shipping?.postcode || selectedCustomer.billing?.postcode || "",
-        country: selectedCustomer.shipping?.country || selectedCustomer.billing?.country || "MX"
+        first_name: String(selectedCustomer.shipping?.first_name || selectedCustomer.first_name || billingData.first_name || "").trim(),
+        last_name: String(selectedCustomer.shipping?.last_name || selectedCustomer.last_name || billingData.last_name || "").trim(),
+        company: String(selectedCustomer.shipping?.company || ""),
+        address_1: String(selectedCustomer.shipping?.address_1 || selectedCustomer.billing?.address_1 || ""),
+        address_2: String(selectedCustomer.shipping?.address_2 || selectedCustomer.billing?.address_2 || ""),
+        city: String(selectedCustomer.shipping?.city || selectedCustomer.billing?.city || ""),
+        state: String(selectedCustomer.shipping?.state || selectedCustomer.billing?.state || ""),
+        postcode: String(selectedCustomer.shipping?.postcode || selectedCustomer.billing?.postcode || ""),
+        country: String(selectedCustomer.shipping?.country || selectedCustomer.billing?.country || "MX")
       };
 
-      // Validar campos requeridos
-      if (!billingData.first_name || !billingData.last_name || !billingData.email) {
-        toast.error("El cliente debe tener nombre, apellido y email para crear un pedido");
+      // Validar campos requeridos con mensajes específicos
+      const missingFields = [];
+      if (!billingData.first_name) missingFields.push("nombre");
+      if (!billingData.last_name) missingFields.push("apellido");
+      if (!billingData.email) missingFields.push("email");
+      
+      if (missingFields.length > 0) {
+        toast.error(`El cliente debe tener ${missingFields.join(", ")} para crear un pedido`);
+        console.error("Missing fields:", missingFields);
+        console.error("Selected customer data:", selectedCustomer);
+        console.error("Billing data:", billingData);
         return;
       }
 

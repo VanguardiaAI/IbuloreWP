@@ -39,6 +39,13 @@ import { ordersApi } from "@/lib/api";
 import { toast } from "sonner";
 import { formatWooCommercePrice, DEFAULT_CURRENCY } from "@/lib/currency";
 import { CurrencyIndicator } from "@/components/ui/CurrencyIndicator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type Order = {
   id: number;
@@ -52,7 +59,7 @@ export type Order = {
   customer_id: number;
 };
 
-const getStatusBadgeVariant = (status: string) => {
+const getStatusBadgeVariant = (status: string): any => {
   switch (status) {
     case "pending":
       return "secondary";
@@ -61,7 +68,7 @@ const getStatusBadgeVariant = (status: string) => {
     case "on-hold":
       return "outline";
     case "completed":
-      return "default";
+      return "success";
     case "cancelled":
       return "destructive";
     case "refunded":
@@ -109,11 +116,95 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "status",
     header: "Estado",
-    cell: ({ row }) => (
-      <Badge variant={getStatusBadgeVariant(row.getValue("status"))}>
-        {getStatusLabel(row.getValue("status"))}
-      </Badge>
-    ),
+    cell: ({ row, table }) => {
+      const [isUpdating, setIsUpdating] = React.useState(false);
+      const currentStatus = row.getValue("status") as string;
+      
+      const handleStatusChange = async (newStatus: string) => {
+        if (newStatus === currentStatus) return;
+        
+        setIsUpdating(true);
+        try {
+          await ordersApi.updateOrder(row.original.id, { status: newStatus });
+          
+          // Actualizar el estado local
+          const meta = table.options.meta as any;
+          if (meta?.updateOrderStatus) {
+            meta.updateOrderStatus(row.original.id, newStatus);
+          }
+          
+          toast.success(`Estado del pedido #${row.original.number} actualizado a ${getStatusLabel(newStatus)}`);
+        } catch (error) {
+          console.error("Error updating order status:", error);
+          toast.error("Error al actualizar el estado del pedido");
+        } finally {
+          setIsUpdating(false);
+        }
+      };
+      
+      return (
+        <Select
+          value={currentStatus}
+          onValueChange={handleStatusChange}
+          disabled={isUpdating}
+        >
+          <SelectTrigger 
+            className="w-[140px] h-8" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SelectValue>
+              <Badge 
+                variant={getStatusBadgeVariant(currentStatus)}
+                className="w-full justify-center"
+              >
+                {isUpdating ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  getStatusLabel(currentStatus)
+                )}
+              </Badge>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">
+              <Badge variant={getStatusBadgeVariant("pending")} className="w-full">
+                Pendiente
+              </Badge>
+            </SelectItem>
+            <SelectItem value="processing">
+              <Badge variant={getStatusBadgeVariant("processing")} className="w-full">
+                Procesando
+              </Badge>
+            </SelectItem>
+            <SelectItem value="on-hold">
+              <Badge variant={getStatusBadgeVariant("on-hold")} className="w-full">
+                En espera
+              </Badge>
+            </SelectItem>
+            <SelectItem value="completed">
+              <Badge variant={getStatusBadgeVariant("completed")} className="w-full">
+                Completado
+              </Badge>
+            </SelectItem>
+            <SelectItem value="cancelled">
+              <Badge variant={getStatusBadgeVariant("cancelled")} className="w-full">
+                Cancelado
+              </Badge>
+            </SelectItem>
+            <SelectItem value="refunded">
+              <Badge variant={getStatusBadgeVariant("refunded")} className="w-full">
+                Reembolsado
+              </Badge>
+            </SelectItem>
+            <SelectItem value="failed">
+              <Badge variant={getStatusBadgeVariant("failed")} className="w-full">
+                Fallido
+              </Badge>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    },
   },
   {
     accessorKey: "date_created",
@@ -210,6 +301,15 @@ export function OrdersTable() {
   const [statusFilter, setStatusFilter] = React.useState<string>("");
   const router = useRouter();
 
+  // Función para actualizar el estado de un pedido localmente
+  const updateOrderStatus = React.useCallback((orderId: number, newStatus: string) => {
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+  }, []);
+
   const fetchOrders = React.useCallback(async () => {
     try {
       setLoading(true);
@@ -283,6 +383,9 @@ export function OrdersTable() {
     },
     manualPagination: true,
     pageCount: pagination.total_pages,
+    meta: {
+      updateOrderStatus,
+    },
   });
 
   return (

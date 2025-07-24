@@ -848,6 +848,54 @@ export const categoriesApi = {
   },
 };
 
+// Dashboard API
+export const dashboardApi = {
+  // Get complete dashboard statistics
+  getStats: async () => {
+    return apiCall<{
+      sales: {
+        total: number;
+        change: number;
+        currency: string;
+      };
+      orders: {
+        total: number;
+        change: number;
+        completed: number;
+      };
+      products: {
+        total: number;
+        change: number;
+      };
+      customers: {
+        total: number;
+        new_this_month: number;
+        change: number;
+      };
+      recent_activity: Array<{
+        type: 'order' | 'product' | 'customer' | 'payment';
+        title: string;
+        time: string;
+        status: string;
+      }>;
+      sales_chart: Array<{
+        month: string;
+        revenue: number;
+      }>;
+    }>('/dashboard/stats');
+  },
+
+  // Get quick stats for real-time updates
+  getQuickStats: async () => {
+    return apiCall<{
+      orders: number;
+      products: number;
+      customers: number;
+      timestamp: string;
+    }>('/dashboard/quick-stats');
+  },
+};
+
 // Inventory API
 export interface InventoryProduct {
   id: number;

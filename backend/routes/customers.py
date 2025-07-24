@@ -8,6 +8,56 @@ customers_bp = Blueprint('customers_bp', __name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def calculate_customer_stats(wc_api, customer_id):
+    """
+    Calcula las estadísticas de pedidos para un cliente específico.
+    """
+    try:
+        # Obtener todos los pedidos del cliente
+        orders_response = wc_api.get("orders", params={
+            'customer': customer_id,
+            'per_page': 100,
+            'status': 'any'
+        })
+        orders = orders_response.json()
+        
+        if not isinstance(orders, list):
+            return {
+                'orders_count': 0,
+                'total_spent': '0',
+                'last_order_date': None
+            }
+        
+        # Filtrar pedidos válidos (excluir carritos abandonados)
+        valid_orders = [
+            order for order in orders 
+            if order.get('status') not in ['checkout-draft', 'failed', 'cancelled']
+        ]
+        
+        # Calcular total gastado (solo pedidos completados o procesando)
+        total_spent = sum(
+            float(order.get('total', 0)) 
+            for order in valid_orders 
+            if order.get('status') in ['completed', 'processing']
+        )
+        
+        # Obtener fecha del último pedido
+        last_order_date = valid_orders[0].get('date_created') if valid_orders else None
+        
+        return {
+            'orders_count': len(valid_orders),
+            'total_spent': str(total_spent),
+            'last_order_date': last_order_date
+        }
+        
+    except Exception as e:
+        logger.warning(f"Error calculating stats for customer {customer_id}: {e}")
+        return {
+            'orders_count': 0,
+            'total_spent': '0',
+            'last_order_date': None
+        }
+
 @customers_bp.route('/customers', methods=['GET'])
 def get_customers():
     """
@@ -45,22 +95,48 @@ def get_customers():
             response = wc_api.get("customers", params=params)
             registered_customers = response.json() if isinstance(response.json(), list) else []
             
-            # Obtener información de último pedido para clientes registrados
+            # Obtener información de pedidos para clientes registrados
             for customer in registered_customers:
                 try:
+                    # Obtener todos los pedidos del cliente para calcular estadísticas
                     customer_orders_response = wc_api.get("orders", params={
                         'customer': customer.get('id'),
-                        'per_page': 1,
+                        'per_page': 100,  # Obtener hasta 100 pedidos para cálculos precisos
                         'orderby': 'date',
-                        'order': 'desc'
+                        'order': 'desc',
+                        'status': 'any'
                     })
                     customer_orders = customer_orders_response.json()
-                    if customer_orders and len(customer_orders) > 0:
-                        customer['last_order_date'] = customer_orders[0].get('date_created')
+                    
+                    if customer_orders and isinstance(customer_orders, list):
+                        # Filtrar pedidos válidos (excluir carritos abandonados y fallidos)
+                        valid_orders = [
+                            order for order in customer_orders 
+                            if order.get('status') not in ['checkout-draft', 'failed', 'cancelled']
+                        ]
+                        
+                        # Calcular estadísticas
+                        customer['orders_count'] = len(valid_orders)
+                        customer['total_spent'] = str(sum(
+                            float(order.get('total', 0)) 
+                            for order in valid_orders 
+                            if order.get('status') in ['completed', 'processing']
+                        ))
+                        
+                        # Obtener fecha del último pedido
+                        if valid_orders:
+                            customer['last_order_date'] = valid_orders[0].get('date_created')
+                        else:
+                            customer['last_order_date'] = None
                     else:
+                        customer['orders_count'] = 0
+                        customer['total_spent'] = '0'
                         customer['last_order_date'] = None
+                        
                 except Exception as order_error:
-                    logger.warning(f"Error fetching last order for customer {customer.get('id')}: {order_error}")
+                    logger.warning(f"Error fetching orders for customer {customer.get('id')}: {order_error}")
+                    customer['orders_count'] = 0
+                    customer['total_spent'] = 0
                     customer['last_order_date'] = None
                     
         except Exception as e:
@@ -321,22 +397,48 @@ def search_customers():
             response = wc_api.get("customers", params=params)
             registered_customers = response.json() if isinstance(response.json(), list) else []
             
-            # Obtener información de último pedido para clientes registrados
+            # Obtener información de pedidos para clientes registrados
             for customer in registered_customers:
                 try:
+                    # Obtener todos los pedidos del cliente para calcular estadísticas
                     customer_orders_response = wc_api.get("orders", params={
                         'customer': customer.get('id'),
-                        'per_page': 1,
+                        'per_page': 100,  # Obtener hasta 100 pedidos para cálculos precisos
                         'orderby': 'date',
-                        'order': 'desc'
+                        'order': 'desc',
+                        'status': 'any'
                     })
                     customer_orders = customer_orders_response.json()
-                    if customer_orders and len(customer_orders) > 0:
-                        customer['last_order_date'] = customer_orders[0].get('date_created')
+                    
+                    if customer_orders and isinstance(customer_orders, list):
+                        # Filtrar pedidos válidos (excluir carritos abandonados y fallidos)
+                        valid_orders = [
+                            order for order in customer_orders 
+                            if order.get('status') not in ['checkout-draft', 'failed', 'cancelled']
+                        ]
+                        
+                        # Calcular estadísticas
+                        customer['orders_count'] = len(valid_orders)
+                        customer['total_spent'] = str(sum(
+                            float(order.get('total', 0)) 
+                            for order in valid_orders 
+                            if order.get('status') in ['completed', 'processing']
+                        ))
+                        
+                        # Obtener fecha del último pedido
+                        if valid_orders:
+                            customer['last_order_date'] = valid_orders[0].get('date_created')
+                        else:
+                            customer['last_order_date'] = None
                     else:
+                        customer['orders_count'] = 0
+                        customer['total_spent'] = '0'
                         customer['last_order_date'] = None
+                        
                 except Exception as order_error:
-                    logger.warning(f"Error fetching last order for customer {customer.get('id')}: {order_error}")
+                    logger.warning(f"Error fetching orders for customer {customer.get('id')}: {order_error}")
+                    customer['orders_count'] = 0
+                    customer['total_spent'] = 0
                     customer['last_order_date'] = None
                     
         except Exception as e:

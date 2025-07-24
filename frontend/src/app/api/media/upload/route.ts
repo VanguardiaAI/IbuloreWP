@@ -6,12 +6,32 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     
-    const backendResponse = await fetch(`${BACKEND_URL}/api/media/upload`, {
+    // Construir la URL correcta dependiendo del entorno
+    let uploadUrl: string;
+    if (BACKEND_URL.startsWith('http')) {
+      // URL absoluta (desarrollo)
+      uploadUrl = `${BACKEND_URL}/api/media/upload`;
+    } else if (BACKEND_URL === '/panel/api') {
+      // En producción, necesitamos usar la URL completa del backend
+      // Asumiendo que el backend está en el mismo dominio
+      const host = request.headers.get('host') || 'localhost';
+      const protocol = request.headers.get('x-forwarded-proto') || 'http';
+      uploadUrl = `${protocol}://${host}${BACKEND_URL}/media/upload`;
+    } else {
+      // Ruta relativa genérica
+      uploadUrl = `${BACKEND_URL}/media/upload`;
+    }
+    
+    console.log('Upload URL:', uploadUrl);
+    
+    const backendResponse = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
     });
 
     const data = await backendResponse.text();
+    console.log('Backend response status:', backendResponse.status);
+    console.log('Backend response:', data);
     
     if (!backendResponse.ok) {
       return NextResponse.json(

@@ -183,6 +183,15 @@ export function CustomerSearch({ selectedCustomer, onCustomerChange }: CustomerS
   const [showCreateForm, setShowCreateForm] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   
+  // Estados para el formulario de creación
+  const [isCreating, setIsCreating] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: ""
+  });
+  
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Búsqueda real de clientes
@@ -201,14 +210,14 @@ export function CustomerSearch({ selectedCustomer, onCustomerChange }: CustomerS
       // Transform API response to match our Customer interface
       const transformedCustomers: Customer[] = response.customers.map((customer: any) => ({
         id: customer.id,
-        first_name: customer.first_name,
-        last_name: customer.last_name,
-        email: customer.email,
-        phone: customer.phone || customer.billing?.phone,
-        username: customer.username,
-        avatar_url: customer.avatar_url,
-        date_created: customer.date_created,
-        date_modified: customer.date_modified,
+        first_name: customer.first_name || "",
+        last_name: customer.last_name || "",
+        email: customer.email || "",
+        phone: customer.phone || customer.billing?.phone || "",
+        username: customer.username || "",
+        avatar_url: customer.avatar_url || "",
+        date_created: customer.date_created || "",
+        date_modified: customer.date_modified || "",
         orders_count: customer.orders_count || 0,
         total_spent: customer.total_spent || 0,
         billing: {
@@ -280,6 +289,93 @@ export function CustomerSearch({ selectedCustomer, onCustomerChange }: CustomerS
     if (customer.orders_count >= 10) return { label: "Frecuente", color: "bg-blue-100 text-blue-800" };
     if (customer.orders_count >= 5) return { label: "Regular", color: "bg-green-100 text-green-800" };
     return { label: "Nuevo", color: "bg-gray-100 text-gray-800" };
+  };
+
+  // Función para crear un nuevo cliente
+  const handleCreateCustomer = async () => {
+    // Validar campos requeridos
+    if (!newCustomer.first_name.trim()) {
+      toast.error("El nombre es requerido");
+      return;
+    }
+    if (!newCustomer.last_name.trim()) {
+      toast.error("Los apellidos son requeridos");
+      return;
+    }
+    if (!newCustomer.email.trim()) {
+      toast.error("El email es requerido");
+      return;
+    }
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newCustomer.email)) {
+      toast.error("Por favor ingresa un email válido");
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      // Crear el cliente usando la API
+      const customerData = {
+        first_name: newCustomer.first_name.trim(),
+        last_name: newCustomer.last_name.trim(),
+        email: newCustomer.email.trim(),
+        phone: newCustomer.phone.trim(),
+        billing: {
+          first_name: newCustomer.first_name.trim(),
+          last_name: newCustomer.last_name.trim(),
+          email: newCustomer.email.trim(),
+          phone: newCustomer.phone.trim(),
+          country: "MX" // País por defecto México
+        },
+        shipping: {
+          first_name: newCustomer.first_name.trim(),
+          last_name: newCustomer.last_name.trim(),
+          country: "MX" // País por defecto México
+        }
+      };
+
+      const response = await customersApi.createCustomer(customerData);
+      
+      // Transformar la respuesta al formato esperado
+      const createdCustomer: Customer = {
+        id: response.id,
+        first_name: response.first_name,
+        last_name: response.last_name,
+        email: response.email,
+        phone: response.phone || "",
+        username: response.username,
+        avatar_url: response.avatar_url || "",
+        date_created: response.date_created,
+        date_modified: response.date_modified,
+        orders_count: 0,
+        total_spent: 0,
+        billing: response.billing || customerData.billing,
+        shipping: response.shipping || customerData.shipping
+      };
+
+      // Seleccionar el cliente creado
+      onCustomerChange(createdCustomer);
+      
+      // Limpiar el formulario y cerrar
+      setNewCustomer({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: ""
+      });
+      setShowCreateForm(false);
+      
+      toast.success(`Cliente ${createdCustomer.first_name} ${createdCustomer.last_name} creado exitosamente`);
+      
+    } catch (error) {
+      console.error("Error creating customer:", error);
+      toast.error("Error al crear el cliente. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -445,7 +541,7 @@ export function CustomerSearch({ selectedCustomer, onCustomerChange }: CustomerS
         </Card>
       )}
 
-      {/* Formulario de creación de cliente (placeholder) */}
+      {/* Formulario de creación de cliente */}
       {showCreateForm && (
         <Card>
           <CardHeader>
@@ -458,27 +554,70 @@ export function CustomerSearch({ selectedCustomer, onCustomerChange }: CustomerS
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Nombre</label>
-                  <Input placeholder="Nombre" />
+                  <label className="text-sm font-medium">Nombre *</label>
+                  <Input 
+                    placeholder="Nombre" 
+                    value={newCustomer.first_name}
+                    onChange={(e) => setNewCustomer({...newCustomer, first_name: e.target.value})}
+                    disabled={isCreating}
+                  />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Apellidos</label>
-                  <Input placeholder="Apellidos" />
+                  <label className="text-sm font-medium">Apellidos *</label>
+                  <Input 
+                    placeholder="Apellidos" 
+                    value={newCustomer.last_name}
+                    onChange={(e) => setNewCustomer({...newCustomer, last_name: e.target.value})}
+                    disabled={isCreating}
+                  />
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Email</label>
-                <Input type="email" placeholder="email@ejemplo.com" />
+                <label className="text-sm font-medium">Email *</label>
+                <Input 
+                  type="email" 
+                  placeholder="email@ejemplo.com" 
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                  disabled={isCreating}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Teléfono</label>
-                <Input placeholder="+34 600 123 456" />
+                <Input 
+                  placeholder="+52 55 1234 5678" 
+                  value={newCustomer.phone}
+                  onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                  disabled={isCreating}
+                />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={() => setShowCreateForm(false)}>
-                  Crear Cliente
+                <Button 
+                  onClick={handleCreateCustomer}
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creando...
+                    </>
+                  ) : (
+                    'Crear Cliente'
+                  )}
                 </Button>
-                <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setNewCustomer({
+                      first_name: "",
+                      last_name: "",
+                      email: "",
+                      phone: ""
+                    });
+                  }}
+                  disabled={isCreating}
+                >
                   Cancelar
                 </Button>
               </div>

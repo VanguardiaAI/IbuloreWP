@@ -12,6 +12,7 @@ from routes.attributes import attributes_bp
 from routes.inventory import inventory_bp
 from routes.orishas import orishas_bp
 from routes.blog import blog_bp
+from routes.dashboard import dashboard_bp
 
 
 def create_app():
@@ -42,6 +43,7 @@ def create_app():
     app.register_blueprint(inventory_bp, url_prefix='/api')
     app.register_blueprint(orishas_bp, url_prefix='/api')
     app.register_blueprint(blog_bp, url_prefix='/api')
+    app.register_blueprint(dashboard_bp, url_prefix='/api')
 
 
     @app.route("/")
