@@ -29,10 +29,13 @@ export function ImageUploader({ images, onImagesChange, mainImageId, onMainImage
       formData.append("file", file);
 
       try {
-        // En producción, usar directamente la ruta del backend
-        const uploadUrl = process.env.NODE_ENV === 'production' 
+        // Detectar si estamos en producción basándonos en la URL
+        const isProduction = window.location.pathname.startsWith('/panel');
+        const uploadUrl = isProduction 
           ? "/panel/api/media/upload"
           : "/api/media/upload";
+        
+        console.log("Upload URL:", uploadUrl, "isProduction:", isProduction);
           
         const response = await fetch(uploadUrl, {
           method: "POST",
