@@ -6,6 +6,9 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     
+    console.log('BACKEND_URL from env:', BACKEND_URL);
+    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
+    
     // Construir la URL correcta dependiendo del entorno
     let uploadUrl: string;
     if (BACKEND_URL.startsWith('http')) {
@@ -13,16 +16,17 @@ export async function POST(request: NextRequest) {
       uploadUrl = `${BACKEND_URL}/api/media/upload`;
     } else if (BACKEND_URL === '/panel/api') {
       // En producción, necesitamos usar la URL completa del backend
-      // Asumiendo que el backend está en el mismo dominio
+      // El backend Flask está en el mismo servidor pero en un path diferente
       const host = request.headers.get('host') || 'localhost';
-      const protocol = request.headers.get('x-forwarded-proto') || 'http';
-      uploadUrl = `${protocol}://${host}${BACKEND_URL}/media/upload`;
+      const protocol = request.headers.get('x-forwarded-proto') || 'https';
+      // Construir la URL correcta: https://dominio.com/panel/api/media/upload
+      uploadUrl = `${protocol}://${host}/panel/api/media/upload`;
     } else {
       // Ruta relativa genérica
       uploadUrl = `${BACKEND_URL}/media/upload`;
     }
     
-    console.log('Upload URL:', uploadUrl);
+    console.log('Constructed Upload URL:', uploadUrl);
     
     const backendResponse = await fetch(uploadUrl, {
       method: 'POST',

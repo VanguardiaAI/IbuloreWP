@@ -29,7 +29,12 @@ export function ImageUploader({ images, onImagesChange, mainImageId, onMainImage
       formData.append("file", file);
 
       try {
-        const response = await fetch("/api/media/upload", {
+        // En producción, usar directamente la ruta del backend
+        const uploadUrl = process.env.NODE_ENV === 'production' 
+          ? "/panel/api/media/upload"
+          : "/api/media/upload";
+          
+        const response = await fetch(uploadUrl, {
           method: "POST",
           body: formData,
         });
